@@ -5,14 +5,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🌿 Daily Task Plan</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    #countdown-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.9);
+      border-top: 2px solid #d1fae5;
+      padding: 0.75rem;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+      font-family: 'Courier New', monospace;
+      color: #065f46;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      z-index: 50;
+    }
+    #countdown span {
+      display: inline-block;
+      min-width: 60px;
+      padding: 0 6px;
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-green-50 to-blue-100 min-h-screen p-6">
-  <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl p-8">
-    <h1 class="text-4xl font-bold text-center text-green-700 mb-6">🌞 Today's Task Plan</h1>
+<body class="bg-gradient-to-br from-green-50 to-blue-100 min-h-screen pb-20 p-4">
+  <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl p-6 relative">
+    <!-- Top Status -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="bg-green-100 text-green-800 px-4 py-2 rounded-xl shadow font-semibold">
+        ✅ Days Done: <span id="days-done">--</span>
+      </div>
+      <h1 class="text-3xl font-bold text-green-700 text-center">🌞 Today's Task Plan</h1>
+      <div class="bg-red-100 text-red-800 px-4 py-2 rounded-xl shadow font-semibold">
+        ⏳ Days Remaining: <span id="days-left">--</span>
+      </div>
+    </div>
+
+    <!-- Task Table -->
     <div id="table-container" class="overflow-auto"></div>
   </div>
 
+  <!-- Fixed Creative Countdown Timer -->
+  <div id="countdown-wrapper">
+    🚀 You have <span id="countdown"></span> left to conquer this mission. Stay sharp!
+  </div>
+
   <script>
+    const START_DATE = new Date("2025-07-23T00:00:00");
+    const END_DATE = new Date("2027-07-23T00:00:00");
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = END_DATE - now;
+      const daysTotal = Math.floor((END_DATE - START_DATE) / (1000 * 60 * 60 * 24));
+      const daysDone = Math.floor((now - START_DATE) / (1000 * 60 * 60 * 24));
+      const daysLeft = Math.max(0, daysTotal - daysDone);
+
+      const ms = diff % 1000;
+      const sec = Math.floor(diff / 1000) % 60;
+      const min = Math.floor(diff / 1000 / 60) % 60;
+      const hr = Math.floor(diff / 1000 / 60 / 60) % 24;
+      const days = Math.floor(diff / 1000 / 60 / 60 / 24) % 30;
+      const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30)) % 12;
+      const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+
+      document.getElementById("countdown").innerHTML =
+        `<span>${years} yr</span> <span>${months} mo</span> <span>${days} d</span> <span>${hr} hr</span> <span>${min} min</span> <span>${sec}s</span> <span>${String(ms).padStart(3, '0')}ms</span>`;
+
+      document.getElementById("days-done").textContent = daysDone;
+      document.getElementById("days-left").textContent = daysLeft;
+    }
+
+    setInterval(updateCountdown, 50);
+
     const today = new Date().toISOString().split('T')[0];
 
     fetch('excel-to-json.json')
